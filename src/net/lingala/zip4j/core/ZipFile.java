@@ -74,7 +74,7 @@ public class ZipFile {
 	
 	/**
 	 * Creates a new Zip File Object with the input file.
-	 * If the zip file does not exist, it is not created at this point.
+	 * If the zip file does not exist, it is ｐぅぎｎnot created at this point.
 	 * @param zipFile
 	 * @throws ZipException
 	 */
@@ -99,7 +99,7 @@ public class ZipFile {
 	 * @throws ZipException
 	 */
 	public void createZipFile(File sourceFile, ZipParameters parameters) throws ZipException {
-		ArrayList sourceFileList = new ArrayList();
+		List<File> sourceFileList = new ArrayList<>();
 		sourceFileList.add(sourceFile);
 		createZipFile(sourceFileList, parameters, false, -1);
 	}
@@ -120,7 +120,7 @@ public class ZipFile {
 	public void createZipFile(File sourceFile, ZipParameters parameters, 
 			boolean splitArchive, long splitLength) throws ZipException {
 		
-		ArrayList sourceFileList = new ArrayList();
+		List<File> sourceFileList = new ArrayList<>();
 		sourceFileList.add(sourceFile);
 		createZipFile(sourceFileList, parameters, splitArchive, splitLength);
 	}
@@ -151,7 +151,7 @@ public class ZipFile {
 	 * @param splitLength - if archive has to be split, then length in bytes at which it has to be split
 	 * @throws ZipException
 	 */
-	public void createZipFile(ArrayList sourceFileList, ZipParameters parameters, 
+	public void createZipFile(List<File> sourceFileList, ZipParameters parameters,
 			boolean splitArchive, long splitLength) throws ZipException {
 		
 		if (!Zip4jUtil.isStringNotNullAndNotEmpty(file)) {
@@ -165,11 +165,7 @@ public class ZipFile {
 		if (sourceFileList == null) {
 			throw new ZipException("input file ArrayList is null, cannot create zip file");
 		}
-		
-		if (!Zip4jUtil.checkArrayListTypes(sourceFileList, InternalZipConstants.LIST_TYPE_FILE)) {
-			throw new ZipException("One or more elements in the input ArrayList is not of type File");
-		}
-		
+
 		createNewZipModel();
 		this.zipModel.setSplitArchive(splitArchive);
 		this.zipModel.setSplitLength(splitLength);
@@ -245,7 +241,7 @@ public class ZipFile {
 	 * @throws ZipException
 	 */
 	public void addFile(File sourceFile, ZipParameters parameters) throws ZipException {
-		ArrayList sourceFileList = new ArrayList();
+		List<File> sourceFileList = new ArrayList<>();
 		sourceFileList.add(sourceFile);
 		addFiles(sourceFileList, parameters);
 	}
@@ -258,7 +254,7 @@ public class ZipFile {
 	 * @param parameters
 	 * @throws ZipException
 	 */
-	public void addFiles(ArrayList sourceFileList, ZipParameters parameters) throws ZipException {
+	public void addFiles(List<File> sourceFileList, ZipParameters parameters) throws ZipException {
 		
 		checkZipModel();
 		
@@ -269,11 +265,7 @@ public class ZipFile {
 		if (sourceFileList == null) {
 			throw new ZipException("input file ArrayList is null, cannot add files");
 		}
-		
-		if (!Zip4jUtil.checkArrayListTypes(sourceFileList, InternalZipConstants.LIST_TYPE_FILE)) {
-			throw new ZipException("One or more elements in the input ArrayList is not of type File");
-		}
-		
+
 		if (parameters == null) {
 			throw new ZipException("input parameters are null, cannot add files to zip");
 		}
@@ -729,17 +721,20 @@ public class ZipFile {
 			throw new ZipException("invalid zip file");
 		}
 		
-		ArrayList fileHeaderList = zipModel.getCentralDirectory().getFileHeaders();
-		for (int i = 0; i < fileHeaderList.size(); i++) {
-			FileHeader fileHeader = (FileHeader)fileHeaderList.get(i);
-			if (fileHeader != null) {
-				if (fileHeader.isEncrypted()) {
+		List<FileHeader> fileHeaderList = zipModel.getCentralDirectory().getFileHeaders();
+        isEncrypted = fileHeaderList.stream().anyMatch(
+                FileHeader::isEncrypted
+        );
+        /* old code.
+        for (FileHeader fh : fileHeaderList) {
+			if (fh != null) {
+				if (fh.isEncrypted()) {
 					isEncrypted = true;
 					break;
 				}
 			}
 		}
-		
+		*/
 		return isEncrypted;
 	}
 	

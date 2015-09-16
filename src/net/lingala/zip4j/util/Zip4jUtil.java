@@ -505,47 +505,6 @@ public class Zip4jUtil {
 	}
 	
 	/**
-	 * Checks to see if all the elements in the arraylist match the given type
-	 * @param sourceList - list to be checked
-	 * @param type - type of elements to be present in the list (ex: File, String, etc)
-	 * @return true if all elements match the given type, if not returns false
-	 */
-	public static boolean checkArrayListTypes(ArrayList sourceList, int type) throws ZipException {
-		
-		if (sourceList == null) {
-			throw new ZipException("input arraylist is null, cannot check types");
-		}
-		
-		if (sourceList.size() <= 0) {
-			return true;
-		}
-		
-		boolean invalidFound = false;
-		
-		switch (type) {
-		case InternalZipConstants.LIST_TYPE_FILE:
-			for (int i = 0; i < sourceList.size(); i++) {
-				if (!(sourceList.get(i) instanceof File)) {
-					invalidFound = true;
-					break;
-				}
-			}
-			break;
-		case InternalZipConstants.LIST_TYPE_STRING:
-			for (int i = 0; i < sourceList.size(); i++) {
-				if (!(sourceList.get(i) instanceof String)) {
-					invalidFound = true;
-					break;
-				}
-			}
-			break;
-		default:
-			break;
-		}
-		return !invalidFound;
-	}
-	
-	/**
 	 * Detects the encoding charset for the input string
 	 * @param str
 	 * @return String - charset for the String

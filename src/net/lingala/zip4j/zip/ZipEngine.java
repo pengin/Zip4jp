@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.io.SplitOutputStream;
@@ -52,14 +53,14 @@ public class ZipEngine {
 		this.zipModel = zipModel;
 	}
 	
-	public void addFiles(final ArrayList fileList, final ZipParameters parameters,
+	public void addFiles(final List<File> fileList, final ZipParameters parameters,
 			final ProgressMonitor progressMonitor, boolean runInThread) throws ZipException {
 		
 		if (fileList == null || parameters == null) {
 			throw new ZipException("one of the input parameters is null when adding files");
 		}
 		
-		if(fileList.size() <= 0) {
+		if(fileList.isEmpty()) {
 			throw new ZipException("no files to add");
 		}
 		
@@ -86,7 +87,7 @@ public class ZipEngine {
 		}
 	}
 	
-	private void initAddFiles(ArrayList fileList, ZipParameters parameters,
+	private void initAddFiles(List<File> fileList, ZipParameters parameters,
 			ProgressMonitor progressMonitor) throws ZipException {
 		
 		if (fileList == null || parameters == null) {
@@ -338,15 +339,13 @@ public class ZipEngine {
 	 * 
 	 * <b>Note:</b> Relative path has to be passed as the fileName
 	 * 
-	 * @param zipModel
-	 * @param fileName
 	 * @throws ZipException
 	 */
-	private void removeFilesIfExists(ArrayList fileList, ZipParameters parameters, ProgressMonitor progressMonitor) throws ZipException {
+	private void removeFilesIfExists(List<File> fileList, ZipParameters parameters, ProgressMonitor progressMonitor) throws ZipException {
 		
 		if (zipModel == null || zipModel.getCentralDirectory() == null || 
 				zipModel.getCentralDirectory().getFileHeaders() == null || 
-						zipModel.getCentralDirectory().getFileHeaders().size() <= 0) {
+						zipModel.getCentralDirectory().getFileHeaders().isEmpty()) {
 			//For a new zip file, this condition satisfies, so do nothing
 			return;
 		}
@@ -449,35 +448,33 @@ public class ZipEngine {
 		return endCentralDirRecord;
 	}
 	
-	private long calculateTotalWork(ArrayList fileList, ZipParameters parameters) throws ZipException {
+	private long calculateTotalWork(List<File> fileList, ZipParameters parameters) throws ZipException {
 		if (fileList == null) {
 			throw new ZipException("file list is null, cannot calculate total work");
 		}
 		
 		long totalWork = 0;
-		
-		for (int i = 0; i < fileList.size(); i++) {
-			if(fileList.get(i) instanceof File) {
-				if (((File)fileList.get(i)).exists()) {
-					if (parameters.isEncryptFiles() && 
-							parameters.getEncryptionMethod() == Zip4jConstants.ENC_METHOD_STANDARD) {
-						totalWork += (Zip4jUtil.getFileLengh((File)fileList.get(i)) * 2);
-					} else {
-						totalWork += Zip4jUtil.getFileLengh((File)fileList.get(i));
-					}
-					
-					if (zipModel.getCentralDirectory() != null && 
-							zipModel.getCentralDirectory().getFileHeaders() != null && 
-							zipModel.getCentralDirectory().getFileHeaders().size() > 0) {
-						String relativeFileName = Zip4jUtil.getRelativeFileName(
-								((File)fileList.get(i)).getAbsolutePath(), parameters.getRootFolderInZip(), parameters.getDefaultFolderPath());
-						FileHeader fileHeader = Zip4jUtil.getFileHeader(zipModel, relativeFileName);
-						if (fileHeader != null) {
-							totalWork += (Zip4jUtil.getFileLengh(new File(zipModel.getZipFile())) - fileHeader.getCompressedSize());
-						}
-					}
-				}
-			}
+
+        for (File f : fileList) {
+            if (f.exists()) {
+                if (parameters.isEncryptFiles() &&
+                        parameters.getEncryptionMethod() == Zip4jConstants.ENC_METHOD_STANDARD) {
+                    totalWork += (Zip4jUtil.getFileLengh(f) * 2);
+                } else {
+                    totalWork += Zip4jUtil.getFileLengh(f);
+                }
+
+                if (zipModel.getCentralDirectory() != null &&
+                        zipModel.getCentralDirectory().getFileHeaders() != null &&
+                        !zipModel.getCentralDirectory().getFileHeaders().isEmpty()) {
+                    String relativeFileName = Zip4jUtil.getRelativeFileName(
+                            f.getAbsolutePath(), parameters.getRootFolderInZip(), parameters.getDefaultFolderPath());
+                    FileHeader fileHeader = Zip4jUtil.getFileHeader(zipModel, relativeFileName);
+                    if (fileHeader != null) {
+                        totalWork += (Zip4jUtil.getFileLengh(new File(zipModel.getZipFile())) - fileHeader.getCompressedSize());
+                    }
+                }
+            }
 		}
 		
 		return totalWork;
