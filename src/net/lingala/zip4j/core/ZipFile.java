@@ -74,7 +74,7 @@ public class ZipFile {
 	
 	/**
 	 * Creates a new Zip File Object with the input file.
-	 * If the zip file does not exist, it is ｐぅぎｎnot created at this point.
+	 * If the zip file does not exist, it is not created at this point.
 	 * @param zipFile
 	 * @throws ZipException
 	 */
